@@ -1,0 +1,12 @@
+Sampling Project
+
+Housing data set (n=1460)
+Variable of interest: Sales price
+
+Stratification Variable Candidates:
+1. GrLivArea + LotArea (col AU)
+2. Year Built (col T)
+3. MSsubclass (col B)
+4. HouseStyle (col Q)
+5. OverallCond (col R)
+6. OVerallQual (col S)
