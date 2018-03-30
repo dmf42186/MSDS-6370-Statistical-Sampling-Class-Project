@@ -1,0 +1,206 @@
+
+proc import datafile = "/home/sbhattacharyya1/Raw Data Sources/Sampling_proj_data.xlsx"
+	out = housing
+	dbms = xlsx replace;
+	getnames = Yes;
+run;
+
+
+/********************* Simple Random Sampling **************************/
+
+proc surveyselect data = housing method = srs n = 208 seed = 100000 out = srssample;
+	title "Simple Random Sample";
+run;
+
+proc surveymeans data = srssample total = 1460
+	mean sum clsum;
+	var SalePrice;
+run;
+
+
+/*************************************** Stratified Samling with House Style for Stratification **************************************/
+
+proc sort data = housing;
+by HouseStyle;
+run;
+
+/********************* Proportion Allocation **************************/
+
+proc surveyselect data = housing method = srs out = propsample
+	sampsize = (22, 2, 103, 1, 2, 64, 5, 9) seed = 100000;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+data strsizes;
+informat HouseStyle $6.;
+format HouseStyle $6.;
+input HouseStyle $6. _total_;
+datalines;
+1.5Fin 154
+1.5Unf 14
+1Story 726
+2.5Fin 8
+2.5Unf 11
+2Story 445
+SFoyer 37
+SLvl   65
+;
+run;
+
+proc surveymeans data = propsample sum clm clsum total = strsizes
+	mean sum clsum;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+/********************* Neyman Allocation **************************/
+
+proc surveyselect data = housing method = srs out = neysample
+	sampsize = (23, 0, 92, 2, 2, 78, 3, 8) seed = 100000;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = neysample sum clm clsum total = strsizes
+	mean sum clsum;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+
+/*************************************** Stratified Samling with Year of Sale for Stratification **************************************/
+
+proc sort data = housing;
+by YrSold;
+run;
+
+/********************* Proportion Allocation **************************/
+
+proc surveyselect data = housing method = srs out = propsample
+	sampsize = (45, 47, 43, 48, 25) seed = 100000;
+	strata YrSold;
+	title "Proportional Allocation";
+run;
+
+data strsizes;
+input YrSold _total_;
+datalines;
+2006 314
+2007 329
+2008 304
+2009 338
+2010 175
+;
+run;
+
+proc surveymeans data = propsample sum clm clsum total = strsizes
+	mean sum clsum;
+	var SalePrice;
+	weight SamplingWeight;
+	strata YrSold;
+	title "Proportional Allocation";
+run;
+
+/********************* Neyman Allocation **************************/
+
+proc surveyselect data = housing method = srs out = neysample
+	sampsize = (43, 54, 45, 42, 24) seed = 100000;
+	strata YrSold;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = neysample sum clm clsum total = strsizes
+	mean sum clsum;
+	var SalePrice;
+	weight SamplingWeight;
+	strata YrSold;
+	title "Neyman Allocation";
+run;
+
+
+/*************************************** Two Stage Sampling (Neighborhood for Cluster & House Style for Stratification) **************************************/
+
+proc surveyselect data = housing noprint sampsize = 5 seed = 100000 out = ClusterSample;
+	cluster Neighborhood;
+run;
+
+proc freq data = ClusterSample;
+	tables Neighborhood / nocum nopercent;
+	title "Cluster Frequency";
+run;
+
+proc sort data = ClusterSample;
+by HouseStyle;
+run;
+
+proc surveyselect data = ClusterSample method = srs out = propsample
+	sampsize = (1, 15, 8, 3, 1) seed = 100000;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+data strsizes;
+informat HouseStyle $6.;
+format HouseStyle $6.;
+input HouseStyle $6. _total_;
+datalines;
+1.5Fin 5
+1Story 77
+2Story 41
+SFoyer 12
+SLvl   6
+;
+run;
+
+proc surveymeans data = propsample sum clm clsum total = strsizes
+	mean sum clsum;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+/*************************************** Two Stage Sampling (Neighborhood for Cluster & Year of Sale for Stratification) **************************************/
+
+proc surveyselect data = housing noprint sampsize = 5 seed = 100000 out = ClusterSample;
+	cluster Neighborhood;
+run;
+
+proc freq data = ClusterSample;
+	tables Neighborhood / nocum nopercent;
+	title "Cluster Frequency";
+run;
+
+proc sort data = ClusterSample;
+by YrSold;
+run;
+
+proc surveyselect data = ClusterSample method = srs out = propsample
+	sampsize = (6, 6, 5, 6, 5) seed = 100000;
+	strata YrSold;
+	title "Proportional Allocation";
+run;
+
+data strsizes;
+input YrSold _total_;
+datalines;
+2006 30
+2007 31
+2008 24
+2009 29
+2010 27
+;
+run;
+
+proc surveymeans data = propsample sum clm clsum total = strsizes
+	mean sum clsum;
+	var SalePrice;
+	weight SamplingWeight;
+	strata YrSold;
+	title "Proportional Allocation";
+run;
