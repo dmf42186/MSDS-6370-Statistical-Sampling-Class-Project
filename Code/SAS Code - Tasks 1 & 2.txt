@@ -1,0 +1,410 @@
+/********************* Task 1 **************************/
+
+libname mydata "/home/freemand0/Data Sets/MSDS 6370 Statistical Sampling/Class Project/";
+
+/********************* Import Data **************************/
+
+proc import datafile = "/home/freemand0/Data Sets/MSDS 6370 Statistical Sampling/Class Project/Sampling_proj_data.xlsx"
+	out = mydata.housing
+	dbms = xlsx replace;
+	getnames = Yes;
+run;
+
+
+/********************* Simple Random Sampling **************************/
+
+proc surveyselect data = mydata.housing method = srs n = 208 seed = 100000 out = mydata.srssample;
+	title "Simple Random Sample";
+run;
+
+proc surveymeans data = mydata.srssample total = 1460
+	mean clm;
+	var SalePrice;
+run;
+
+
+/*************************************** Stratified Sampling with House Style for Stratification **************************************/
+
+proc sort data = mydata.housing;
+by HouseStyle;
+run;
+
+/********************* Proportion Allocation **************************/
+
+proc surveyselect data = mydata.housing method = srs out = mydata.propsample
+	sampsize = (22, 2, 103, 1, 2, 64, 5, 9) seed = 100000;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+data mydata.strsizes;
+informat HouseStyle $6.;
+format HouseStyle $6.;
+input HouseStyle $6. _total_;
+datalines;
+1.5Fin 154
+1.5Unf 14
+1Story 726
+2.5Fin 8
+2.5Unf 11
+2Story 445
+SFoyer 37
+SLvl   65
+;
+run;
+
+proc surveymeans data = mydata.propsample total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+/********************* Neyman Allocation **************************/
+
+proc surveyselect data = mydata.housing method = srs out = mydata.neysample
+	sampsize = (23, 0, 92, 2, 2, 78, 3, 8) seed = 100000;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = mydata.neysample total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+/*************************************** Two Stage Sampling (Neighborhood for Cluster & House Style for Stratification) **************************************/
+
+proc surveyselect data = mydata.housing noprint sampsize = 5 seed = 100000 out = mydata.ClusterSample;
+	cluster Neighborhood;
+run;
+
+proc freq data = mydata.ClusterSample;
+	tables Neighborhood / nocum nopercent;
+	title "Cluster Frequency";
+run;
+
+proc sort data = mydata.ClusterSample;
+by HouseStyle;
+run;
+
+proc surveyselect data = mydata.ClusterSample method = srs out = mydata.twostagesample
+	sampsize = (1, 15, 8, 3, 1) seed = 100000;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+data mydata.strsizes_cluster;
+informat HouseStyle $6.;
+format HouseStyle $6.;
+input HouseStyle $6. _total_;
+datalines;
+1.5Fin 5
+1Story 77
+2Story 41
+SFoyer 12
+SLvl   6
+;
+run;
+
+proc surveymeans data = mydata.twostagesample total = mydata.strsizes_cluster
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+/********************* Task 2 **************************/
+
+/********************* True Population Mean **************************/
+
+proc means data = mydata.housing;
+	var SalePrice;
+run;
+
+/********************* Simple Random Sampling **************************/
+
+proc surveyselect data = mydata.housing method = srs n = 208 seed = 965617 out = mydata.srssample1;
+	title "Simple Random Sample";
+run;
+
+proc surveymeans data = mydata.srssample1 total = 1460
+	mean clm;
+	var SalePrice;
+run;
+
+proc surveyselect data = mydata.housing method = srs n = 208 seed = 662888 out = mydata.srssample2;
+	title "Simple Random Sample";
+run;
+
+proc surveymeans data = mydata.srssample2 total = 1460
+	mean clm;
+	var SalePrice;
+run;
+
+proc surveyselect data = mydata.housing method = srs n = 208 seed = 869404 out = mydata.srssample3;
+	title "Simple Random Sample";
+run;
+
+proc surveymeans data = mydata.srssample3 total = 1460
+	mean clm;
+	var SalePrice;
+run;
+
+proc surveyselect data = mydata.housing method = srs n = 208 seed = 147603 out = mydata.srssample4;
+	title "Simple Random Sample";
+run;
+
+proc surveymeans data = mydata.srssample4 total = 1460
+	mean clm;
+	var SalePrice;
+run;
+
+proc surveyselect data = mydata.housing method = srs n = 208 seed = 90873 out = mydata.srssample5;
+	title "Simple Random Sample";
+run;
+
+proc surveymeans data = mydata.srssample5 total = 1460
+	mean clm;
+	var SalePrice;
+run;
+
+/*************************************** Stratified Sampling with House Style for Stratification **************************************/
+
+proc sort data = mydata.housing;
+by HouseStyle;
+run;
+
+/********************* Proportion Allocation **************************/
+
+proc surveyselect data = mydata.housing method = srs out = mydata.propsample1
+	sampsize = (22, 2, 103, 1, 2, 64, 5, 9) seed = 818956;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.propsample1 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.propsample2
+	sampsize = (22, 2, 103, 1, 2, 64, 5, 9) seed = 93297;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.propsample2 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.propsample3
+	sampsize = (22, 2, 103, 1, 2, 64, 5, 9) seed = 496581;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.propsample3 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.propsample4
+	sampsize = (22, 2, 103, 1, 2, 64, 5, 9) seed = 342872;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.propsample4 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.propsample5
+	sampsize = (22, 2, 103, 1, 2, 64, 5, 9) seed = 154257;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.propsample5 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+/********************* Neyman Allocation **************************/
+
+proc surveyselect data = mydata.housing method = srs out = mydata.neysample1
+	sampsize = (23, 0, 92, 2, 2, 78, 3, 8) seed = 8509;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = mydata.neysample1 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.neysample2
+	sampsize = (23, 0, 92, 2, 2, 78, 3, 8) seed = 357761;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = mydata.neysample2 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.neysample3
+	sampsize = (23, 0, 92, 2, 2, 78, 3, 8) seed = 457196;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = mydata.neysample3 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.neysample4
+	sampsize = (23, 0, 92, 2, 2, 78, 3, 8) seed = 732870;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = mydata.neysample4 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveyselect data = mydata.housing method = srs out = mydata.neysample5
+	sampsize = (23, 0, 92, 2, 2, 78, 3, 8) seed = 202192;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+proc surveymeans data = mydata.neysample5 total = mydata.strsizes
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Neyman Allocation";
+run;
+
+/*************************************** Two Stage Sampling (Neighborhood for Cluster & House Style for Stratification) **************************************/
+
+proc surveyselect data = mydata.housing noprint sampsize = 5 seed = 100000 out = mydata.ClusterSample;
+	cluster Neighborhood;
+run;
+
+proc freq data = mydata.ClusterSample;
+	tables Neighborhood / nocum nopercent;
+	title "Cluster Frequency";
+run;
+
+proc sort data = mydata.ClusterSample;
+	by HouseStyle;
+run;
+
+proc surveyselect data = mydata.ClusterSample method = srs out = mydata.twostagesample1
+	sampsize = (1, 15, 8, 3, 1) seed = 606631;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.twostagesample1 total = mydata.strsizes_cluster
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.ClusterSample method = srs out = mydata.twostagesample2
+	sampsize = (1, 15, 8, 3, 1) seed = 632472;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.twostagesample2 total = mydata.strsizes_cluster
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.ClusterSample method = srs out = mydata.twostagesample3
+	sampsize = (1, 15, 8, 3, 1) seed = 841676;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.twostagesample3 total = mydata.strsizes_cluster
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.ClusterSample method = srs out = mydata.twostagesample4
+	sampsize = (1, 15, 8, 3, 1) seed = 13977;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.twostagesample4 total = mydata.strsizes_cluster
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveyselect data = mydata.ClusterSample method = srs out = mydata.twostagesample5
+	sampsize = (1, 15, 8, 3, 1) seed = 939001;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
+
+proc surveymeans data = mydata.twostagesample5 total = mydata.strsizes_cluster
+	mean clm;
+	var SalePrice;
+	weight SamplingWeight;
+	strata HouseStyle;
+	title "Proportional Allocation";
+run;
